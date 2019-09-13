@@ -11,15 +11,7 @@ import mate.academy.internetshop.model.Item;
 public class ItemDaoImpl implements ItemDao {
     @Override
     public Item add(Item item) {
-        Item any = Storage.items.stream()
-                .filter(i -> i.getId().equals(item.getId()))
-                .findAny()
-                .orElse(null);
-        if (any == null) {
-            Storage.items.add(item);
-        } else {
-            update(item);
-        }
+        Storage.items.add(item);
         return item;
     }
 

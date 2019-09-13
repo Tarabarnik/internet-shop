@@ -1,14 +1,20 @@
 package mate.academy.internetshop.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import mate.academy.internetshop.IdGenerator;
-
 public class User {
+    private static Long idGenerator = 0L;
     private final Long id;
     private String name;
     private List<Order> orders;
     private Bucket bucket;
+
+    public User() {
+        this.id = idGenerator++;
+        orders = new ArrayList<>();
+        this.bucket = new Bucket(this.id);
+    }
 
     public Bucket getBucket() {
         return bucket;
@@ -24,10 +30,6 @@ public class User {
 
     public void setOrders(List<Order> orders) {
         this.orders = orders;
-    }
-
-    public User() {
-        this.id = IdGenerator.getGeneratedId();
     }
 
     public void setName(String name) {

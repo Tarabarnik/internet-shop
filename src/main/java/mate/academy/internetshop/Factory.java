@@ -11,37 +11,79 @@ import mate.academy.internetshop.dao.impl.UserDaoImpl;
 import mate.academy.internetshop.service.BucketService;
 import mate.academy.internetshop.service.ItemService;
 import mate.academy.internetshop.service.OrderService;
+import mate.academy.internetshop.service.UserService;
 import mate.academy.internetshop.service.impl.BucketServiceImpl;
 import mate.academy.internetshop.service.impl.ItemServiceImpl;
 import mate.academy.internetshop.service.impl.OrderServiceImpl;
+import mate.academy.internetshop.service.impl.UserServiceImpl;
 
 public class Factory {
 
+    private static ItemService itemService;
+    private static ItemDao itemDao;
+
+    private static BucketDao bucketDao;
+    private static BucketService bucketService;
+
+    private static OrderDao orderDao;
+    private static OrderService orderService;
+
+    private static UserDao userDao;
+    private static UserService userService;
+
     public static ItemService getItemService() {
-        return new ItemServiceImpl();
+        if (itemService == null) {
+            itemService = new ItemServiceImpl();
+        }
+        return itemService;
     }
 
     public  static ItemDao getItemDao() {
-        return new ItemDaoImpl();
+        if (itemDao == null) {
+            itemDao = new ItemDaoImpl();
+        }
+        return itemDao;
     }
 
     public static BucketDao getBucketDao() {
-        return new BucketDaoImpl();
+        if (bucketDao == null) {
+            bucketDao = new BucketDaoImpl();
+        }
+        return bucketDao;
     }
 
     public static BucketService getBucketService() {
-        return new BucketServiceImpl();
+        if (bucketService == null) {
+            bucketService = new BucketServiceImpl();
+        }
+        return bucketService;
     }
 
     public static OrderDao getOrderDao() {
-        return new OrderDaoImpl();
+        if (orderDao == null) {
+            orderDao = new OrderDaoImpl();
+        }
+        return orderDao;
     }
 
     public static OrderService getOrderService() {
-        return  new OrderServiceImpl();
+        if (orderService == null) {
+            orderService = new OrderServiceImpl();
+        }
+        return orderService;
     }
 
     public static UserDao getUserDao() {
-        return  new UserDaoImpl();
+        if (userDao == null) {
+            userDao = new UserDaoImpl();
+        }
+        return userDao;
+    }
+
+    public static UserService getUserService() {
+        if (userService == null) {
+            userService = new UserServiceImpl();
+        }
+        return userService;
     }
 }

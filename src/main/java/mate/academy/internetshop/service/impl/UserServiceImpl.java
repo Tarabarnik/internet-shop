@@ -13,7 +13,7 @@ import mate.academy.internetshop.service.UserService;
 public class UserServiceImpl implements UserService {
 
     @Inject
-    private UserDao userDao;
+    private static UserDao userDao;
 
     @Override
     public User add(User user) {
