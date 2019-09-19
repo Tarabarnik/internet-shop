@@ -1,5 +1,6 @@
 import mate.academy.internetshop.Factory;
-import mate.academy.internetshop.lib.Injector;
+import mate.academy.internetshop.lib.Inject;
+import mate.academy.internetshop.lib.InjectorOld;
 import mate.academy.internetshop.model.Bucket;
 import mate.academy.internetshop.model.Item;
 import mate.academy.internetshop.model.Order;
@@ -11,18 +12,20 @@ import mate.academy.internetshop.service.UserService;
 
 public class Main {
 
+    @Inject
+    private static ItemService itemService;
+    @Inject
+    private static UserService userService;
+
     static {
         try {
-            Injector.injectDependency();
+            InjectorOld.injectDependency();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
-
-        ItemService itemService = Factory.getItemService();
-        UserService userService = Factory.getUserService();
 
         Item item1 = new Item("Dima", 1.);
         Item item2 = new Item("Vova", .9);

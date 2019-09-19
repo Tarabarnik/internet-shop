@@ -14,6 +14,10 @@ public class Order {
         this.items = items;
     }
 
+    public Double totalPrice() {
+        return items.stream().mapToDouble(Item::getPrice).sum();
+    }
+
     public void setUserId(Long userId) {
         this.userId = userId;
     }
