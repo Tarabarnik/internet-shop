@@ -44,8 +44,6 @@ public class Main {
 
         OrderService orderService = Factory.getOrderService();
         Order order = orderService.completeOrder(bucket.getItems(), bucket.getUserId());
-        
         order.getItems().forEach(System.out::print);
-
     }
 }
