@@ -18,4 +18,5 @@ public interface UserService {
     List<Order> getOrders(Long userId);
 
     List<User> getAll();
+
 }
