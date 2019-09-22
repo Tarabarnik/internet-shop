@@ -1,6 +1,8 @@
+package mate.academy.internetshop;
+
 import mate.academy.internetshop.Factory;
 import mate.academy.internetshop.lib.Inject;
-import mate.academy.internetshop.lib.InjectorOld;
+import mate.academy.internetshop.lib.Injector;
 import mate.academy.internetshop.model.Bucket;
 import mate.academy.internetshop.model.Item;
 import mate.academy.internetshop.model.Order;
@@ -19,7 +21,7 @@ public class Main {
 
     static {
         try {
-            InjectorOld.injectDependency();
+            Injector.injectDependency();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

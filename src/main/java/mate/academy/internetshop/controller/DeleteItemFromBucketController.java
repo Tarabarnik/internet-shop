@@ -10,7 +10,7 @@ import mate.academy.internetshop.lib.Inject;
 import mate.academy.internetshop.model.Bucket;
 import mate.academy.internetshop.service.BucketService;
 
-public class DeleteItemController extends HttpServlet {
+public class DeleteItemFromBucketController extends HttpServlet {
     @Inject
     private static BucketService bucketService;
 

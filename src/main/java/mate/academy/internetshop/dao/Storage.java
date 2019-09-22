@@ -13,4 +13,11 @@ public class Storage {
     public static final List<Bucket> buckets = new ArrayList<>();
     public static final List<Order> orders = new ArrayList<>();
     public static final List<User> users = new ArrayList<>();
+
+    static {
+        items.add(new Item("Dima", 12.50));
+        items.add(new Item("Vova", 12.50));
+        items.add(new Item("Burger", 13.));
+        users.add(new User("Pavel", "Kurilyuk", "Tarabarnik", "111"));
+    }
 }

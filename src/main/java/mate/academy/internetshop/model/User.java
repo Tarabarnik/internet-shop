@@ -27,6 +27,14 @@ public class User {
         this.name = name;
     }
 
+    public User(String name, String surname, String login, String password) {
+        this();
+        this.name = name;
+        this.surname = surname;
+        this.login = login;
+        this.password = password;
+    }
+
     public Bucket getBucket() {
         return bucket;
     }
