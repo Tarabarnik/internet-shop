@@ -37,7 +37,6 @@ public class Injector {
 
     private static List<Class> getClasses(String packageName)
             throws ClassNotFoundException, IOException {
-        String name = Injector.class.getPackageName();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
         String path = packageName.replace('.', '/');
