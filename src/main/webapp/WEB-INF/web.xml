@@ -73,7 +73,7 @@
     </servlet-mapping>
     <servlet>
         <servlet-name>deleteItem</servlet-name>
-        <servlet-class>mate.academy.internetshop.controller.DeleteItemController</servlet-class>
+        <servlet-class>mate.academy.internetshop.controller.DeleteItemFromBucketController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>deleteItem</servlet-name>
