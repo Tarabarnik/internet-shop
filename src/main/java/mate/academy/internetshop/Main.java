@@ -1,6 +1,5 @@
 package mate.academy.internetshop;
 
-import mate.academy.internetshop.Factory;
 import mate.academy.internetshop.lib.Inject;
 import mate.academy.internetshop.lib.Injector;
 import mate.academy.internetshop.model.Bucket;
@@ -11,9 +10,10 @@ import mate.academy.internetshop.service.BucketService;
 import mate.academy.internetshop.service.ItemService;
 import mate.academy.internetshop.service.OrderService;
 import mate.academy.internetshop.service.UserService;
+import org.apache.log4j.Logger;
 
 public class Main {
-
+    private static Logger logger = Logger.getLogger(Main.class);
     @Inject
     private static ItemService itemService;
     @Inject
@@ -23,7 +23,7 @@ public class Main {
         try {
             Injector.injectDependency();
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
