@@ -1,6 +1,7 @@
-import mate.academy.internetshop.Factory;
+package mate.academy.internetshop;
+
 import mate.academy.internetshop.lib.Inject;
-import mate.academy.internetshop.lib.InjectorOld;
+import mate.academy.internetshop.lib.Injector;
 import mate.academy.internetshop.model.Bucket;
 import mate.academy.internetshop.model.Item;
 import mate.academy.internetshop.model.Order;
@@ -9,10 +10,9 @@ import mate.academy.internetshop.service.BucketService;
 import mate.academy.internetshop.service.ItemService;
 import mate.academy.internetshop.service.OrderService;
 import mate.academy.internetshop.service.UserService;
-import org.apache.log4j.Logger;
 
 public class Main {
-    private static Logger logger = Logger.getLogger(Main.class);
+
     @Inject
     private static ItemService itemService;
     @Inject
@@ -20,9 +20,9 @@ public class Main {
 
     static {
         try {
-            InjectorOld.injectDependency();
+            Injector.injectDependency();
         } catch (IllegalAccessException e) {
-            logger.error(e);
+            e.printStackTrace();
         }
     }
 
@@ -45,7 +45,8 @@ public class Main {
 
         OrderService orderService = Factory.getOrderService();
         Order order = orderService.completeOrder(bucket.getItems(), bucket.getUserId());
-
+        
         order.getItems().forEach(System.out::print);
+
     }
 }
