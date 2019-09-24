@@ -11,12 +11,15 @@ import mate.academy.internetshop.service.ItemService;
 import mate.academy.internetshop.service.OrderService;
 import mate.academy.internetshop.service.UserService;
 
+import java.util.logging.Logger;
+
 public class Main {
 
     @Inject
     private static ItemService itemService;
     @Inject
     private static UserService userService;
+    private static Logger logger = Logger.getLogger(String.valueOf(Main.class));
 
     static {
         try {

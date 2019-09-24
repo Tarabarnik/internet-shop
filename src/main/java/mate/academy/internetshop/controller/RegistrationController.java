@@ -42,6 +42,6 @@ public class RegistrationController extends HttpServlet {
             newUser.setSurname(surname);
             userService.add(newUser);
         }
-        resp.sendRedirect(req.getContextPath() + "/users");
+        resp.sendRedirect(req.getContextPath() + "/servlet/users");
     }
 }
