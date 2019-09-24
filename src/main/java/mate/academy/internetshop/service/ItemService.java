@@ -1,5 +1,7 @@
 package mate.academy.internetshop.service;
 
+import java.util.List;
+
 import mate.academy.internetshop.model.Item;
 
 public interface ItemService {
@@ -12,4 +14,5 @@ public interface ItemService {
 
     void remove(Long id);
 
+    List<Item> getAll();
 }
