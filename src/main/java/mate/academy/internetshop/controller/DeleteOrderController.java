@@ -24,6 +24,6 @@ public class DeleteOrderController extends HttpServlet {
         Order order = orderService.get(Long.valueOf(orderId));
         orderService.remove(order.getId());
         userService.get(order.getUserId()).getOrders().remove(order);
-        resp.sendRedirect(req.getContextPath() + "/servlet/users");
+        resp.sendRedirect(req.getContextPath() + "/index");
     }
 }

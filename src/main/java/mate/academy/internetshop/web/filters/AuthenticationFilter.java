@@ -1,10 +1,7 @@
 package mate.academy.internetshop.web.filters;
 
-import mate.academy.internetshop.lib.Inject;
-import mate.academy.internetshop.model.User;
-import mate.academy.internetshop.service.UserService;
-import org.apache.log4j.Logger;
-
+import java.io.IOException;
+import java.util.Optional;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -13,8 +10,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
+
+import mate.academy.internetshop.lib.Inject;
+import mate.academy.internetshop.model.User;
+import mate.academy.internetshop.service.UserService;
+import org.apache.log4j.Logger;
 
 public class AuthenticationFilter implements Filter {
     private static Logger logger = Logger.getLogger(AuthenticationFilter.class);
@@ -30,19 +31,28 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
+        HttpServletResponse resp = (HttpServletResponse) servletResponse;
+        if (req.getCookies() == null) {
+            processUnAuthenticated(req, resp);
+            return;
+        }
         for (Cookie cookie : req.getCookies()) {
             if (cookie.getName().equals("MATE")) {
                 Optional<User> user = userService.getByToken(cookie.getValue());
                 if (user.isPresent()) {
-                    logger.info("user" + user.get().getLogin() + "was authenticated");
+                    logger.info("user" + user.get().getLogin() + " was authenticated");
                     chain.doFilter(servletRequest, servletResponse);
-                } else {
-                    logger.info("user was not authenticated");
-                    chain.doFilter(servletRequest, servletResponse);
-                    //to login
+                    return;
                 }
             }
         }
+        logger.info("user was not authenticated");
+        processUnAuthenticated(req, resp);
+    }
+
+    private void processUnAuthenticated(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.sendRedirect(req.getContextPath() + "/login");
     }
 
     @Override

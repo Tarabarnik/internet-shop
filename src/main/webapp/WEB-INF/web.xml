@@ -117,7 +117,7 @@
 </filter>
     <filter-mapping>
         <filter-name>auth-filter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/users</url-pattern>
     </filter-mapping>
     <listener>
         <listener-class>mate.academy.internetshop.controller.InjectInitializer</listener-class>

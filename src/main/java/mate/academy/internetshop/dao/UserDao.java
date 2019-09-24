@@ -1,9 +1,9 @@
 package mate.academy.internetshop.dao;
 
+import java.util.Optional;
+
 import mate.academy.internetshop.exceptions.AuthenticationException;
 import mate.academy.internetshop.model.User;
-
-import java.util.Optional;
 
 public interface UserDao {
 

@@ -15,7 +15,7 @@ Login page!
 <div>${errorMsg}</div>
 <form action="login" method="post">
     <div class="container">
-        <h1>Register</h1>
+        <h1>Login</h1>
         <p>Please fill in this form to log into account.</p>
         <hr>
         <label for="login"><b>Login</b></label>
