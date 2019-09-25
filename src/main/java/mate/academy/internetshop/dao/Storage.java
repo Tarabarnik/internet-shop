@@ -18,6 +18,5 @@ public class Storage {
         items.add(new Item("Dima", 12.50));
         items.add(new Item("Vova", 12.50));
         items.add(new Item("Burger", 13.));
-        users.add(new User("Pavel", "Kurilyuk", "Tarabarnik", "111"));
     }
 }

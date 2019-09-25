@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mate.academy.internetshop.lib.Inject;
+import mate.academy.internetshop.model.Bucket;
+import mate.academy.internetshop.model.User;
 import mate.academy.internetshop.service.BucketService;
 import mate.academy.internetshop.service.UserService;
 
@@ -19,16 +21,11 @@ public class AddItemToBucketController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("WEB-INF/views/addItem.jsp").forward(req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        Long userId = Long.valueOf(req.getParameter("user_ID"));
+        Long userId = (Long) req.getSession(true).getAttribute("userId");
+        User user = userService.get(userId);
+        Bucket bucket = user.getBucket();
         Long itemId = Long.valueOf(req.getParameter("item_ID"));
-        Long bucketId = userService.get(userId).getBucket().getId();
-        bucketService.addItem(bucketId, itemId);
+        bucketService.addItem(bucket.getId(), itemId);
         resp.sendRedirect(req.getContextPath() + "/items");
     }
 }

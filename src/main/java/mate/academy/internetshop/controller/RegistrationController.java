@@ -2,9 +2,11 @@ package mate.academy.internetshop.controller;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import mate.academy.internetshop.lib.Inject;
 import mate.academy.internetshop.model.User;
@@ -40,8 +42,14 @@ public class RegistrationController extends HttpServlet {
             newUser.setPassword(psw);
             newUser.setName(name);
             newUser.setSurname(surname);
-            userService.add(newUser);
+            User user = userService.add(newUser);
+
+            HttpSession session = req.getSession();
+            session.setAttribute("userId", user.getId());
+
+            Cookie cookie = new Cookie("MATE", user.getToken());
+            resp.addCookie(cookie);
         }
-        resp.sendRedirect(req.getContextPath() + "/users");
+        resp.sendRedirect(req.getContextPath() + "/index");
     }
 }

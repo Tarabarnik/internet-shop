@@ -21,17 +21,21 @@ Catalogue:
         <th>ID</th>
         <th>Name</th>
         <th>Price</th>
+        <th>Buy</th>
     </tr>
-    <c:forEach var="order" items="${items}">
+    <c:forEach var="item" items="${items}">
         <tr>
             <td>
-                <c:out value="${order.id}" />
+                <c:out value="${item.id}" />
             </td>
             <td>
-                <c:out value="${order.name}" />
+                <c:out value="${item.name}" />
             </td>
             <td>
-                <c:out value="${order.price}" />
+                <c:out value="${item.price}" />
+            </td>
+            <td>
+                <a href="/internet_shop_war_exploded/addItem?item_ID=${item.id}">Buy</a>
             </td>
         </tr>
     </c:forEach>
