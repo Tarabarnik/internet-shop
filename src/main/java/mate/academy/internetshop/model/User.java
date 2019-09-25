@@ -1,7 +1,9 @@
 package mate.academy.internetshop.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import mate.academy.internetshop.dao.Storage;
 
@@ -15,6 +17,19 @@ public class User {
     private String token;
     private List<Order> orders;
     private Bucket bucket;
+    private Set<Role> roles = new HashSet<>();
+
+    public void addRole(Role role) {
+        roles.add(role);
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
 
     public User() {
         this.id = idGenerator++;
