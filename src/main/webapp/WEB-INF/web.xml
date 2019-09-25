@@ -103,6 +103,22 @@
         <servlet-name>login</servlet-name>
         <url-pattern>/login</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>inject</servlet-name>
+        <servlet-class>mate.academy.internetshop.controller.DataInjectInitializer</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>inject</servlet-name>
+        <url-pattern>/inject</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>logout</servlet-name>
+        <servlet-class>mate.academy.internetshop.controller.LogoutController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>logout</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
     <filter>
         <filter-name>auth-filter</filter-name>
         <filter-class>mate.academy.internetshop.web.filters.AuthenticationFilter</filter-class>
@@ -111,8 +127,39 @@
         <filter-name>auth-filter</filter-name>
         <url-pattern>/users</url-pattern>
     </filter-mapping>
+    <filter>
+        <filter-name>usersAuthorizationFilter</filter-name>
+        <filter-class>mate.academy.internetshop.web.filters.AuthorizationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>usersAuthorizationFilter</filter-name>
+        <url-pattern>/users</url-pattern>
+    </filter-mapping>
+    <filter>
+        <filter-name>bucketAuthorizationFilter</filter-name>
+        <filter-class>mate.academy.internetshop.web.filters.AuthorizationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>bucketAuthorizationFilter</filter-name>
+        <url-pattern>/bucketItems</url-pattern>
+    </filter-mapping>
+    <filter>
+        <filter-name>userOrdersAuthorizationFilter</filter-name>
+        <filter-class>mate.academy.internetshop.web.filters.AuthorizationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>userOrdersAuthorizationFilter</filter-name>
+        <url-pattern>/userOrders</url-pattern>
+    </filter-mapping>
+    <filter>
+        <filter-name>orderAuthorizationFilter</filter-name>
+        <filter-class>mate.academy.internetshop.web.filters.AuthorizationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>orderAuthorizationFilter</filter-name>
+        <url-pattern>/order</url-pattern>
+    </filter-mapping>
     <listener>
         <listener-class>mate.academy.internetshop.controller.InjectInitializer</listener-class>
     </listener>
-
 </web-app>
