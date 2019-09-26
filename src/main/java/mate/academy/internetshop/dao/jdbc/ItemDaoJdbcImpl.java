@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 
 import mate.academy.internetshop.dao.ItemDao;
 import mate.academy.internetshop.lib.Dao;
@@ -22,8 +23,9 @@ public class ItemDaoJdbcImpl extends AbstractDao<Item> implements ItemDao {
     @Override
     public Item add(Item item) {
         Statement statement = null;
-        String query = "INSERT INTO " + DB_NAME + " (name, price)" + " VALUES " + "('"
-                + item.getName() + "', " + item.getPrice() + ");";
+        Locale.setDefault(Locale.US);
+        String query = String.format("INSERT INTO %s (name, price) VALUES ('%s', %f);"
+                , DB_NAME, item.getName(), item.getPrice());
         try {
             statement = connection.createStatement();
             statement.executeUpdate(query);
@@ -44,8 +46,8 @@ public class ItemDaoJdbcImpl extends AbstractDao<Item> implements ItemDao {
     @Override
     public Item get(Long id) {
         Statement statement = null;
-        String query = "SELECT * FROM " + DB_NAME + " WHERE item_id=" + id + ";";
-
+        Locale.setDefault(Locale.US);
+        String query = String.format("SELECT * FROM %s WHERE item_id=%d;", DB_NAME, id);
         try {
             statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
@@ -72,8 +74,9 @@ public class ItemDaoJdbcImpl extends AbstractDao<Item> implements ItemDao {
     @Override
     public Item update(Item item) {
         Statement statement = null;
-        String query = "UPDATE " + DB_NAME + " SET name='" + item.getName() + "', price="
-                + item.getPrice() + " WHERE item_id=" + item.getId() + ";";
+        Locale.setDefault(Locale.US);
+        String query = String.format("UPDATE %s SET name='%s', price=%f WHERE item_id=%d;"
+                , DB_NAME, item.getName(), item.getPrice(), item.getId());
         try {
             statement = connection.createStatement();
             statement.executeUpdate(query);
@@ -94,7 +97,8 @@ public class ItemDaoJdbcImpl extends AbstractDao<Item> implements ItemDao {
     @Override
     public void delete(Long id) {
         Statement statement = null;
-        String query = "DELETE FROM " + DB_NAME + " WHERE item_id=" + id + ";";
+        Locale.setDefault(Locale.US);
+        String query = String.format("DELETE FROM %s WHERE item_id=%d;", DB_NAME, id);
         try {
             statement = connection.createStatement();
             statement.executeUpdate(query);
