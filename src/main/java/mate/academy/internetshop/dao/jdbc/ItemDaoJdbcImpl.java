@@ -46,7 +46,6 @@ public class ItemDaoJdbcImpl extends AbstractDao<Item> implements ItemDao {
     @Override
     public Item get(Long id) {
         Statement statement = null;
-        Locale.setDefault(Locale.US);
         String query = String.format("SELECT * FROM %s WHERE item_id=%d;", DB_NAME, id);
         try {
             statement = connection.createStatement();
@@ -97,7 +96,6 @@ public class ItemDaoJdbcImpl extends AbstractDao<Item> implements ItemDao {
     @Override
     public void delete(Long id) {
         Statement statement = null;
-        Locale.setDefault(Locale.US);
         String query = String.format("DELETE FROM %s WHERE item_id=%d;", DB_NAME, id);
         try {
             statement = connection.createStatement();
