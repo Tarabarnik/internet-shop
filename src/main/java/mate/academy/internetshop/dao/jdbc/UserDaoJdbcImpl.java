@@ -39,80 +39,36 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
 
     @Override
     public User add(User user) {
-        PreparedStatement statement = null;
         String query = "INSERT INTO users (name, surname, login, password, token)"
                 + " VALUES (?, ?, ?, ?, ?);";
-        try {
-            statement = connection.prepareStatement(query);
+        long dbUserId = 0L;
+        try (PreparedStatement statement = connection.prepareStatement(query,
+                PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, user.getName());
             statement.setString(2, user.getSurname());
             statement.setString(3, user.getLogin());
             statement.setString(4, user.getPassword());
             statement.setString(5, user.getToken());
             statement.executeUpdate();
+            ResultSet resultSet = statement.getGeneratedKeys();
+            resultSet.next();
+            dbUserId = resultSet.getLong(1);
         } catch (SQLException e) {
-            logger.warn("Can't add new user with id=" + user.getId(), e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't add new user with id=" + user.getId(), e);
         }
-        String getUserIdByTokenQuery = "SELECT users.user_id FROM users "
-                + "WHERE token=?;";
-        Long userId = 0L;
-        try {
-            statement = connection.prepareStatement(getUserIdByTokenQuery);
-            statement.setString(1, user.getToken());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                userId = resultSet.getLong("user_id");
-            }
-        } catch (SQLException e) {
-            logger.warn("Can't find user_id by token=" + user.getToken(), e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
-        }
-        String addRoleQuery = "INSERT INTO users_roles (user_id, role_id) VALUES ("
-                + userId + ", ?);";
         for (Role role : user.getRoles()) {
-            try {
-                statement = connection.prepareStatement(addRoleQuery);
-                Long roleId = getRoleIdByName(role.getRoleName().toString());
-                statement.setLong(1, roleId);
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                logger.warn(String.format("Can't add %s role for user by id=%d",
-                        role.getRoleName(), userId), e);
-            } finally {
-                if (statement != null) {
-                    try {
-                        statement.close();
-                    } catch (SQLException e) {
-                        logger.warn("Can't close statement", e);
-                    }
-                }
-            }
+            Long roleId = getRoleIdByName(role.getRoleName().toString()).get();
+            addRoleToUser(dbUserId, roleId);
         }
-        return user;
+        User newUser = new User(dbUserId, user);
+        return newUser;
     }
 
     @Override
-    public User get(Long id) {
-        PreparedStatement statement = null;
+    public Optional<User> get(Long id) {
         String query = "SELECT * FROM users WHERE user_id=?;";
         User user = null;
-        try {
-            statement = connection.prepareStatement(query);
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -122,70 +78,33 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
                 String login = resultSet.getString("login");
                 String password = resultSet.getString("password");
                 String token = resultSet.getString("token");
+
                 user = new User(userId, name, surname, login, password);
                 user.setToken(token);
+
                 List<Order> orders = orderDao.getAllOrdersForUser(userId);
                 user.setOrders(orders);
             }
-            query = "SELECT roles.name FROM roles "
-                    + "INNER JOIN users_roles "
-                    + "ON users_roles.role_id=roles.role_id "
-                    + "INNER JOIN users "
-                    + "ON  users_roles.user_id=users.user_id "
-                    + "WHERE users.user_id=?;";
-            statement = connection.prepareStatement(query);
-            statement.setLong(1, id);
-            resultSet = statement.executeQuery();
-            Set<Role> roles = new HashSet<>();
-            while (resultSet.next()) {
-                roles.add((Role.of(resultSet.getString("name"))));
-            }
+
+            Set<Role> roles = getRolesFromUser(id);
             user.setRoles(roles);
-            query = "SELECT bucket_id FROM buckets WHERE user_id=?;";
-            Long bucketId = 0L;
-            statement = connection.prepareStatement(query);
-            statement.setLong(1, user.getId());
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                bucketId = resultSet.getLong("bucket_id");
-            }
-            if (bucketId.equals(0L)) {
-                user.setBucket(bucketDao.add(new Bucket(user.getId())));
-            } else {
-                user.setBucket(bucketDao.get(bucketId));
-            }
+
+            addBucketForUser(user);
+
         } catch (SQLException e) {
-            logger.warn("Can't get bucket items by user_id=" + id, e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't get user by id=" + id, e);
         }
-        return user;
+        return Optional.of(user);
     }
 
     @Override
     public User update(User newUser) {
-        PreparedStatement statement = null;
         String query = "DELETE FROM orders WHERE orders.user_id=?;";
-        try {
-            statement = connection.prepareStatement(query);
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, newUser.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
-            logger.warn("Can't delete user orders by id=" + newUser.getId(), e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't delete user orders by id=" + newUser.getId(), e);
         }
         for (Order order : newUser.getOrders()) {
             try {
@@ -199,184 +118,193 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
 
     @Override
     public User delete(Long id) {
-        PreparedStatement statement = null;
-        User user = get(id);
-        String deleteOrderItemsQuery = "DELETE orders_items.* FROM orders_items "
-                + "INNER JOIN orders ON orders_items.order_id = orders.order_id "
-                + "INNER JOIN users ON orders.user_id = users.user_id "
-                + "WHERE users.user_id=?";
-        String deleteOrdersQuery = "DELETE FROM orders WHERE orders.user_id=?;";
-        try {
-            statement = connection.prepareStatement(deleteOrderItemsQuery);
-            statement.setLong(1, id);
-            statement.executeUpdate();
-            statement = connection.prepareStatement(deleteOrdersQuery);
-            statement.setLong(1, id);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            logger.warn("Can't delete user orders by id=" + id, e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
-        }
-        String deleteUserRolesQuery = "DELETE FROM users_roles WHERE users_roles.user_id=?;";
-        try {
-            statement = connection.prepareStatement(deleteUserRolesQuery);
-            statement.setLong(1, id);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            logger.warn("Can't delete user roles by id=" + id, e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
-        }
-        String deleteUserBucketItemsQuery = "DELETE buckets_items.* "
-                + "FROM buckets_items "
-                + "INNER JOIN buckets ON buckets_items.bucket_id = buckets.bucket_id "
-                + "INNER JOIN users ON users.user_id = buckets.user_id "
-                + "WHERE users.user_id=?";
-        String deleteUserBucketQuery = "DELETE FROM buckets WHERE user_id=?";
+        User user = get(id).get();
+
+        deleteUserOrders(id);
+        deleteUserRoles(id);
+        deleteUserBuckets(id);
+
         String deleteUserQuery = "DELETE FROM users WHERE users.user_id=?;";
-        try {
-            statement = connection.prepareStatement(deleteUserBucketItemsQuery);
-            statement.setLong(1,id);
-            statement.executeUpdate();
-            statement = connection.prepareStatement(deleteUserBucketQuery);
-            statement.setLong(1, id);
-            statement.executeUpdate();
-            statement = connection.prepareStatement(deleteUserQuery);
+        try (PreparedStatement statement = connection.prepareStatement(deleteUserQuery)) {
             statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
-            logger.warn("Can't delete user by id=" + id, e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't delete user by id=" + id, e);
         }
+
         return user;
     }
 
     @Override
     public User login(String login, String password) throws AuthenticationException {
-        PreparedStatement statement = null;
         String query = "SELECT user_id FROM users WHERE login=?;";
         Optional<User> user = Optional.empty();
-        try {
-            statement = connection.prepareStatement(query);
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, login);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 long userId = resultSet.getLong("user_id");
-                user = Optional.of(get(userId));
+                user = get(userId);
                 if (user.isEmpty() || !user.get().getPassword().equals(password)) {
                     throw new AuthenticationException("incorrect username or password");
                 }
                 return user.get();
             }
         } catch (SQLException e) {
-            logger.warn("Can't get item by login=" + login, e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't get item by login=" + login, e);
         }
         return user.get();
     }
 
     @Override
     public Optional<User> getByToken(String token) {
-        PreparedStatement statement = null;
         String query = "SELECT user_id FROM users WHERE token=?;";
         Optional<User> user = Optional.empty();
-        try {
-            statement = connection.prepareStatement(query);
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, token);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                user = Optional.of(get(resultSet.getLong("user_id")));
+                user = get(resultSet.getLong("user_id"));
             }
         } catch (SQLException e) {
-            logger.warn("Can't get user by token=" + token, e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't get user by token=" + token, e);
         }
         return user;
     }
 
     @Override
     public List<User> getAll() {
-        PreparedStatement statement = null;
         String query = "SELECT user_id FROM users;";
         List<User> users = new ArrayList<>();
-        try {
-            statement = connection.prepareStatement(query);
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Long id = resultSet.getLong("user_id");
-                User user = this.get(id);
+                User user = this.get(id).get();
                 users.add(user);
             }
             return users;
         } catch (SQLException e) {
-            logger.warn("Can't get users", e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't get users", e);
         }
         return null;
     }
 
-    private Long getRoleIdByName(String roleName) {
-        PreparedStatement statement = null;
+    private Optional<Long> getRoleIdByName(String roleName) {
         String query = "SELECT role_id FROM roles WHERE name=?";
-        try {
-            statement = connection.prepareStatement(query);
-            statement.setString(1, "'"+roleName+"'");
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, roleName);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                return resultSet.getLong("role_id");
+                return Optional.of(resultSet.getLong("role_id"));
             }
         } catch (SQLException e) {
-            logger.warn("Can't get role by name=" + roleName, e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    logger.warn("Can't close statement", e);
-                }
-            }
+            logger.error("Can't get role by name=" + roleName, e);
         }
-        return null;
+        return Optional.empty();
+    }
+
+    private void addRoleToUser(Long userId, Long roleId) {
+        String addRoleQuery = "INSERT INTO users_roles (user_id, role_id) VALUES (?, ?);";
+        try (PreparedStatement statement = connection.prepareStatement(addRoleQuery)) {
+            statement.setLong(1, userId);
+            statement.setLong(2, roleId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can't add role for user", e);
+        }
+    }
+
+    private Set<Role> getRolesFromUser(Long userId) {
+        String query = "SELECT roles.name FROM roles "
+                + "INNER JOIN users_roles "
+                + "ON users_roles.role_id=roles.role_id "
+                + "INNER JOIN users "
+                + "ON  users_roles.user_id=users.user_id "
+                + "WHERE users.user_id=?;";
+        Set<Role> roles = new HashSet<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setLong(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                roles.add((Role.of(resultSet.getString("name"))));
+            }
+        } catch (SQLException e) {
+            logger.error("Can't get user roles", e);
+        }
+        return roles;
+    }
+
+    private void addBucketForUser(User user) {
+        String query = "SELECT bucket_id FROM buckets WHERE user_id=?;";
+        Long bucketId = 0L;
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setLong(1, user.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                bucketId = resultSet.getLong("bucket_id");
+            }
+        } catch (SQLException e) {
+            logger.error("Can't add bucket to user", e);
+        }
+        if (bucketId.equals(0L)) {
+            user.setBucket(bucketDao.add(new Bucket(user.getId())));
+        } else {
+            user.setBucket(bucketDao.get(bucketId).get());
+        }
+    }
+
+    private void deleteUserOrders(Long userId) {
+        String deleteOrderItemsQuery = "DELETE orders_items.* FROM orders_items "
+                + "INNER JOIN orders ON orders_items.order_id = orders.order_id "
+                + "INNER JOIN users ON orders.user_id = users.user_id "
+                + "WHERE users.user_id=?";
+        String deleteOrdersQuery = "DELETE FROM orders WHERE orders.user_id=?;";
+        try (PreparedStatement statement = connection.prepareStatement(deleteOrderItemsQuery)) {
+            statement.setLong(1, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can't delete user order's items by id=" + userId, e);
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(deleteOrdersQuery)) {
+            statement.setLong(1, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can't delete user orders by id=" + userId, e);
+        }
+    }
+
+    private void deleteUserRoles(Long userId) {
+        String deleteUserRolesQuery = "DELETE FROM users_roles WHERE users_roles.user_id=?;";
+        try (PreparedStatement statement = connection.prepareStatement(deleteUserRolesQuery)) {
+            statement.setLong(1, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can't delete user roles by id=" + userId, e);
+        }
+    }
+
+    private void deleteUserBuckets(Long userId) {
+        String deleteUserBucketItemsQuery = "DELETE buckets_items.* "
+                + "FROM buckets_items "
+                + "INNER JOIN buckets ON buckets_items.bucket_id = buckets.bucket_id "
+                + "INNER JOIN users ON users.user_id = buckets.user_id "
+                + "WHERE users.user_id=?";
+        try (PreparedStatement statement = connection.prepareStatement(
+                deleteUserBucketItemsQuery)) {
+            statement.setLong(1,userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can't delete user by id=" + userId, e);
+        }
+
+        String deleteUserBucketQuery = "DELETE FROM buckets WHERE user_id=?";
+        try (PreparedStatement statement = connection.prepareStatement(deleteUserBucketQuery)) {
+            statement.setLong(1, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can't delete buckets by user_id=" + userId, e);
+        }
     }
 }

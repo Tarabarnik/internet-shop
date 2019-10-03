@@ -22,7 +22,7 @@ public class DeleteItemFromBucketController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Long userId = (Long) req.getSession(true).getAttribute("userId");
-        User user = userService.get(userId);
+        User user = userService.get(userId).get();
         Bucket bucket = user.getBucket();
         String itemId = req.getParameter("item_id");
         bucket.getItems().removeIf(item -> item.getId().equals(Long.valueOf(itemId)));

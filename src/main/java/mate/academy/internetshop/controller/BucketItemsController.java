@@ -22,7 +22,7 @@ public class BucketItemsController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Long userId = (Long) req.getSession(true).getAttribute("userId");
-        User user = userService.get(userId);
+        User user = userService.get(userId).get();
         Bucket bucket = user.getBucket();
         req.setAttribute("bucket", bucket);
         req.getRequestDispatcher("WEB-INF/views/bucketItems.jsp").forward(req, resp);

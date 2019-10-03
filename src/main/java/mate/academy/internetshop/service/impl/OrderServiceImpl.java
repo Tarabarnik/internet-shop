@@ -2,6 +2,7 @@ package mate.academy.internetshop.service.impl;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import mate.academy.internetshop.dao.OrderDao;
 import mate.academy.internetshop.dao.UserDao;
@@ -31,7 +32,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order get(Long id) {
+    public Optional<Order> get(Long id) {
         return orderDao.get(id);
     }
 
@@ -53,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
         } catch (SQLException e) {
             logger.error(e);
         }
-        userDao.get(userId).getOrders().add(order);
+        userDao.get(userId).get().getOrders().add(order);
         return order;
     }
 

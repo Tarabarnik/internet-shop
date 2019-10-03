@@ -60,6 +60,18 @@ public class User {
         this.password = password;
     }
 
+    public User(Long id, User user) {
+        this.id = id;
+        name = user.name;
+        surname = user.surname;
+        login = user.login;
+        password = user.password;
+        token = user.token;
+        orders = user.orders;
+        bucket = user.bucket;
+        roles = user.roles;
+    }
+
     public String getToken() {
         return token;
     }
