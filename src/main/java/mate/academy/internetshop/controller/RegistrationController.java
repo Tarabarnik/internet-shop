@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import mate.academy.internetshop.lib.Inject;
 import mate.academy.internetshop.model.User;
 import mate.academy.internetshop.service.UserService;
+import mate.academy.internetshop.util.HashUtil;
 
 public class RegistrationController extends HttpServlet {
 
@@ -39,7 +40,8 @@ public class RegistrationController extends HttpServlet {
                 && name.length() >= MINIMAL_INPUT_LENGTH
                 && surname.length() >= MINIMAL_INPUT_LENGTH) {
             newUser.setLogin(login);
-            newUser.setPassword(psw);
+            newUser.setSalt(HashUtil.getSalt());
+            newUser.setPassword(HashUtil.hashPassword(psw, newUser.getSalt()));
             newUser.setName(name);
             newUser.setSurname(surname);
             User user = userService.add(newUser);
