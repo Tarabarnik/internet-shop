@@ -58,13 +58,10 @@ public class BucketDaoJdbcImpl extends AbstractDao<Bucket> implements BucketDao 
             while (resultSet.next()) {
                 userId = resultSet.getLong("user_id");
             }
-        } catch (SQLException e) {
-            logger.error("Can't get user id by bucket id=" + bucketId, e);
-        }
-        try {
             List<Item> items = getItemsFromBucket(bucketId);
             return Optional.of(new Bucket(bucketId, items, userId));
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            logger.error("Can't get user id by bucket id=" + bucketId, e);
             return Optional.empty();
         }
     }
