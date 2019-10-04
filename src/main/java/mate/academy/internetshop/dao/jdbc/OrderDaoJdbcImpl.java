@@ -31,10 +31,12 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
     public Order add(Order order) {
         String query = "INSERT INTO orders (user_id) VALUES (?);";
         Long orderId = null;
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (PreparedStatement statement = connection.prepareStatement(query,
+                PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setLong(1, order.getUserId());
             statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
+            generatedKeys.next();
             orderId = generatedKeys.getLong(1);
         } catch (SQLException e) {
             logger.error("Can't create order", e);

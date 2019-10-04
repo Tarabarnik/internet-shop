@@ -15,6 +15,7 @@ public class User {
     private String surname;
     private String login;
     private String password;
+    private byte[] salt;
     private String token;
     private List<Order> orders;
     private Bucket bucket;
@@ -66,10 +67,19 @@ public class User {
         surname = user.surname;
         login = user.login;
         password = user.password;
+        salt = user.salt;
         token = user.token;
         orders = user.orders;
         bucket = user.bucket;
         roles = user.roles;
+    }
+
+    public byte[] getSalt() {
+        return salt;
+    }
+
+    public void setSalt(byte[] salt) {
+        this.salt = salt;
     }
 
     public String getToken() {

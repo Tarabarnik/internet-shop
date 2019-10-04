@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import mate.academy.internetshop.util.HashUtil;
 import org.apache.log4j.Logger;
 
 @Dao
@@ -39,8 +41,8 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
 
     @Override
     public User add(User user) {
-        String query = "INSERT INTO users (name, surname, login, password, token)"
-                + " VALUES (?, ?, ?, ?, ?);";
+        String query = "INSERT INTO users (name, surname, login, password, token, salt)"
+                + " VALUES (?, ?, ?, ?, ?, ?);";
         long dbUserId = 0L;
         try (PreparedStatement statement = connection.prepareStatement(query,
                 PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -49,6 +51,7 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
             statement.setString(3, user.getLogin());
             statement.setString(4, user.getPassword());
             statement.setString(5, user.getToken());
+            statement.setString(6, user.getSalt().toString());
             statement.executeUpdate();
             ResultSet resultSet = statement.getGeneratedKeys();
             resultSet.next();
@@ -78,9 +81,11 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
                 String login = resultSet.getString("login");
                 String password = resultSet.getString("password");
                 String token = resultSet.getString("token");
+                String salt = resultSet.getString("salt");
 
                 user = new User(userId, name, surname, login, password);
                 user.setToken(token);
+                user.setSalt(salt.getBytes());
 
                 List<Order> orders = orderDao.getAllOrdersForUser(userId);
                 user.setOrders(orders);
@@ -145,7 +150,9 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
             while (resultSet.next()) {
                 long userId = resultSet.getLong("user_id");
                 user = get(userId);
-                if (user.isEmpty() || !user.get().getPassword().equals(password)) {
+                if (!login.equals(user.get().getLogin())
+                        || !HashUtil.hashPassword(password, user.get().getSalt())
+                        .equals(user.get().getPassword())) {
                     throw new AuthenticationException("incorrect username or password");
                 }
                 return user.get();
