@@ -61,15 +61,26 @@ public class BucketDaoJdbcImpl extends AbstractDao<Bucket> implements BucketDao 
         } catch (SQLException e) {
             logger.error("Can't get user id by bucket id=" + bucketId, e);
         }
-        List<Item> items = getItemsFromBucket(bucketId);
-        return Optional.of(new Bucket(bucketId, items, userId));
+        try {
+            List<Item> items = getItemsFromBucket(bucketId);
+            return Optional.of(new Bucket(bucketId, items, userId));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public Bucket update(Bucket bucket) {
-        deleteItemsFromBucket(bucket.getId());
-        for (Item item : bucket.getItems()) {
-            addItemToBucket(bucket.getId(), item.getId());
+        String query = "UPDATE buckets SET user_id = ? WHERE bucket_id = ?;";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setLong(1, bucket.getUserId());
+            preparedStatement.setLong(2, bucket.getId());
+            preparedStatement.executeUpdate();
+            for (Item item : bucket.getItems()) {
+                addItemToBucket(bucket.getId(), item.getId());
+            }
+        } catch (SQLException e) {
+            logger.error("Can`t update bucket with id=" + bucket.getId(), e);
         }
         return bucket;
     }

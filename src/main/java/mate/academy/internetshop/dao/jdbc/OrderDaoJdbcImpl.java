@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,8 +65,14 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
 
     @Override
     public Order update(Order newOrder) {
-        delete(newOrder.getId());
-        add(newOrder);
+        String query = "UPDATE orders SET user_id = ? WHERE order_id = ?;";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setLong(1, newOrder.getUserId());
+            preparedStatement.setLong(2, newOrder.getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can`t update order with id=" + newOrder.getId(), e);
+        }
         return newOrder;
     }
 
@@ -132,6 +139,6 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
         } catch (SQLException e) {
             logger.error("Can't get items from order", e);
         }
-        return null;
+        return Collections.emptyList();
     }
 }
