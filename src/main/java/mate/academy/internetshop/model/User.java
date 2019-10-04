@@ -9,6 +9,7 @@ import mate.academy.internetshop.dao.Storage;
 
 public class User {
     private static Long idGenerator = 0L;
+
     private final Long id;
     private String name;
     private String surname;
@@ -49,6 +50,26 @@ public class User {
         this.surname = surname;
         this.login = login;
         this.password = password;
+    }
+
+    public User(Long id, String name, String surname, String login, String password) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.login = login;
+        this.password = password;
+    }
+
+    public User(Long id, User user) {
+        this.id = id;
+        name = user.name;
+        surname = user.surname;
+        login = user.login;
+        password = user.password;
+        token = user.token;
+        orders = user.orders;
+        bucket = user.bucket;
+        roles = user.roles;
     }
 
     public String getToken() {

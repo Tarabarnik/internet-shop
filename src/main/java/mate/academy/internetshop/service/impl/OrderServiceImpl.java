@@ -1,20 +1,21 @@
 package mate.academy.internetshop.service.impl;
 
+import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import mate.academy.internetshop.dao.OrderDao;
-import mate.academy.internetshop.dao.Storage;
 import mate.academy.internetshop.dao.UserDao;
 import mate.academy.internetshop.lib.Inject;
 import mate.academy.internetshop.lib.Service;
 import mate.academy.internetshop.model.Item;
 import mate.academy.internetshop.model.Order;
 import mate.academy.internetshop.service.OrderService;
+import org.apache.log4j.Logger;
 
 @Service
 public class OrderServiceImpl implements OrderService {
-
+    private static Logger logger = Logger.getLogger(OrderServiceImpl.class);
     @Inject
     private static OrderDao orderDao;
     @Inject
@@ -22,11 +23,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order add(Order order) {
-        return orderDao.add(order);
+        try {
+            return orderDao.add(order);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return null;
     }
 
     @Override
-    public Order get(Long id) {
+    public Optional<Order> get(Long id) {
         return orderDao.get(id);
     }
 
@@ -43,15 +49,17 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order completeOrder(List<Item> items, Long userId) {
         Order order = new Order(userId, items);
-        orderDao.add(order);
-        userDao.get(userId).getOrders().add(order);
+        try {
+            orderDao.add(order);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        userDao.get(userId).get().getOrders().add(order);
         return order;
     }
 
     @Override
     public List<Order> getAllOrdersForUser(Long userId) {
-        return Storage.orders.stream()
-                .filter(o -> o.getUserId().equals(userId))
-                .collect(Collectors.toList());
+        return orderDao.getAllOrdersForUser(userId);
     }
 }

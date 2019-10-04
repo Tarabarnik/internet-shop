@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import mate.academy.internetshop.dao.Storage;
-
 import mate.academy.internetshop.dao.UserDao;
 import mate.academy.internetshop.exceptions.AuthenticationException;
 import mate.academy.internetshop.lib.Inject;
@@ -31,7 +29,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User get(Long id) {
+    public Optional<User> get(Long id) {
         return userDao.get(id);
     }
 
@@ -47,12 +45,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Order> getOrders(Long userId) {
-        return userDao.get(userId).getOrders();
+        return userDao.get(userId).get().getOrders();
     }
 
     @Override
     public List<User> getAll() {
-        return Storage.users;
+        return userDao.getAll();
     }
 
     @Override

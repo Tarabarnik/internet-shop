@@ -2,10 +2,12 @@ package mate.academy.internetshop.dao;
 
 import mate.academy.internetshop.model.Bucket;
 
+import java.util.Optional;
+
 public interface BucketDao {
     Bucket add(Bucket bucket);
 
-    Bucket get(Long bucketId);
+    Optional<Bucket> get(Long bucketId);
 
     Bucket update(Bucket bucket);
 

@@ -4,12 +4,19 @@ import java.util.List;
 
 public class Order {
     private static Long idGenerator = 0L;
+
     private final Long id;
     private Long userId;
     private List<Item> items;
 
     public Order(Long userId, List<Item> items) {
         this.id = idGenerator++;
+        this.userId = userId;
+        this.items = items;
+    }
+
+    public Order(Long id, Long userId, List<Item> items) {
+        this.id = id;
         this.userId = userId;
         this.items = items;
     }

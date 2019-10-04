@@ -22,7 +22,7 @@ public class AddItemToBucketController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Long userId = (Long) req.getSession(true).getAttribute("userId");
-        User user = userService.get(userId);
+        User user = userService.get(userId).get();
         Bucket bucket = user.getBucket();
         Long itemId = Long.valueOf(req.getParameter("item_ID"));
         bucketService.addItem(bucket.getId(), itemId);

@@ -8,6 +8,8 @@ import mate.academy.internetshop.model.Bucket;
 import mate.academy.internetshop.model.Item;
 import mate.academy.internetshop.service.BucketService;
 
+import java.util.Optional;
+
 @Service
 public class BucketServiceImpl implements BucketService {
 
@@ -22,7 +24,7 @@ public class BucketServiceImpl implements BucketService {
     }
 
     @Override
-    public Bucket get(Long id) {
+    public Optional<Bucket> get(Long id) {
         return bucketDao.get(id);
     }
 
@@ -38,8 +40,8 @@ public class BucketServiceImpl implements BucketService {
 
     @Override
     public Bucket addItem(Long bucketId, Long itemId) {
-        Bucket bucket = bucketDao.get(bucketId);
-        Item item = itemDao.get(itemId);
+        Bucket bucket = bucketDao.get(bucketId).get();
+        Item item = itemDao.get(itemId).get();
         bucket.getItems().add(item);
         return bucketDao.update(bucket);
     }
