@@ -1,6 +1,5 @@
 package mate.academy.internetshop.util;
 
-import mate.academy.internetshop.model.User;
 import org.apache.log4j.Logger;
 
 import java.security.MessageDigest;
@@ -16,6 +15,7 @@ public class HashUtil {
         random.nextBytes(salt);
         return salt;
     }
+
     public static String hashPassword(String password, byte[] salt) {
         StringBuilder hashedPassword = new StringBuilder();
         try {
