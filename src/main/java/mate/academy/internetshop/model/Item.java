@@ -1,17 +1,27 @@
 package mate.academy.internetshop.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "items")
 public class Item {
-    private static Long idGenerator = 0L;
-    private final Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id", columnDefinition = "INTEGER")
+    private Long id;
+    @Column(name = "name")
     private String name;
+    @Column(name = "price", columnDefinition = "DECIMAL")
     private Double price;
 
-    private Item() {
-        this.id = idGenerator++;
-    }
+    private Item() {}
 
     public Item(String name, Double price) {
-        this.id = idGenerator++;
         this.name = name;
         this.price = price;
     }
