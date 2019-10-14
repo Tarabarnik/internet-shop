@@ -10,6 +10,7 @@ import mate.academy.internetshop.lib.Inject;
 import mate.academy.internetshop.lib.Service;
 import mate.academy.internetshop.model.Item;
 import mate.academy.internetshop.model.Order;
+import mate.academy.internetshop.model.User;
 import mate.academy.internetshop.service.OrderService;
 import org.apache.log4j.Logger;
 
@@ -48,7 +49,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order completeOrder(List<Item> items, Long userId) {
-        Order order = new Order(userId, items);
+        User user = userDao.get(userId).get();
+        Order order = new Order(user, items);
         try {
             orderDao.add(order);
         } catch (SQLException e) {

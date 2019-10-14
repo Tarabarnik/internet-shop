@@ -1,5 +1,15 @@
 package mate.academy.internetshop.dao.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import mate.academy.internetshop.dao.BucketDao;
 import mate.academy.internetshop.dao.ItemDao;
 import mate.academy.internetshop.dao.OrderDao;
@@ -11,17 +21,6 @@ import mate.academy.internetshop.model.Bucket;
 import mate.academy.internetshop.model.Order;
 import mate.academy.internetshop.model.Role;
 import mate.academy.internetshop.model.User;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import mate.academy.internetshop.util.HashUtil;
 import org.apache.log4j.Logger;
 
@@ -255,7 +254,7 @@ public class UserDaoJdbcImpl extends AbstractDao<User> implements UserDao {
             logger.error("Can't add bucket to user", e);
         }
         if (bucketId.equals(0L)) {
-            user.setBucket(bucketDao.add(new Bucket(user.getId())));
+            user.setBucket(bucketDao.add(new Bucket(user)));
         } else {
             user.setBucket(bucketDao.get(bucketId).get());
         }

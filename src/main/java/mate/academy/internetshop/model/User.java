@@ -5,20 +5,41 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import mate.academy.internetshop.dao.Storage;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
+@Entity
+@Table(name = "users")
 public class User {
-    private static Long idGenerator = 0L;
-
-    private final Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id", columnDefinition = "INTEGER")
+    private Long id;
     private String name;
     private String surname;
     private String login;
     private String password;
+    @Column(columnDefinition = "BLOB")
     private byte[] salt;
     private String token;
-    private List<Order> orders;
+    @Transient
+    private List<Order> orders = new ArrayList<>();
+    @OneToOne(mappedBy = "user")
     private Bucket bucket;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
     public void addRole(Role role) {
@@ -34,19 +55,13 @@ public class User {
     }
 
     public User() {
-        this.id = idGenerator++;
-        orders = new ArrayList<>();
-        this.bucket = new Bucket(this.id);
-        Storage.buckets.add(bucket);
     }
 
     public User(String name) {
-        this();
         this.name = name;
     }
 
     public User(String name, String surname, String login, String password) {
-        this();
         this.name = name;
         this.surname = surname;
         this.login = login;
@@ -72,6 +87,10 @@ public class User {
         orders = user.orders;
         bucket = user.bucket;
         roles = user.roles;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public byte[] getSalt() {

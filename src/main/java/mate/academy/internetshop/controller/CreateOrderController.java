@@ -23,7 +23,7 @@ public class CreateOrderController extends HttpServlet {
             throws ServletException, IOException {
         String bucketId = req.getParameter("bucket_id");
         Bucket bucket = bucketService.get(Long.valueOf(bucketId)).get();
-        Order newOrder = orderService.completeOrder(bucket.getItems(), bucket.getUserId());
+        Order newOrder = orderService.completeOrder(bucket.getItems(), bucket.getUser().getId());
         resp.sendRedirect(req.getContextPath() + "/bucketItems?bucket_id=" + bucketId);
     }
 }

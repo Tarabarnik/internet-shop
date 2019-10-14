@@ -35,7 +35,7 @@ public class Main {
 
         User user = new User();
         userService.add(user);
-        Bucket bucket = new Bucket(user.getId());
+        Bucket bucket = new Bucket(user);
         BucketService bucketService = Factory.getBucketService();
         bucketService.add(bucket);
 
@@ -44,7 +44,7 @@ public class Main {
         bucketService.addItem(bucket.getId(), item1.getId());
 
         OrderService orderService = Factory.getOrderService();
-        Order order = orderService.completeOrder(bucket.getItems(), bucket.getUserId());
+        Order order = orderService.completeOrder(bucket.getItems(), bucket.getUser().getId());
         
         order.getItems().forEach(System.out::print);
 

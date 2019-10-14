@@ -27,7 +27,7 @@ public class BucketDaoImpl implements BucketDao {
     public Bucket update(Bucket newBucket) {
         Bucket bucket = get(newBucket.getId()).get();
         bucket.setItems(newBucket.getItems());
-        bucket.setUserId(newBucket.getUserId());
+        bucket.setUser(newBucket.getUser());
         return bucket;
     }
 

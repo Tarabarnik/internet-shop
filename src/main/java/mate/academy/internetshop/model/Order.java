@@ -1,32 +1,34 @@
 package mate.academy.internetshop.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Order {
-    private static Long idGenerator = 0L;
+    private Long id;
+    private User user;
+    private List<Item> items = new ArrayList<>();
 
-    private final Long id;
-    private Long userId;
-    private List<Item> items;
-
-    public Order(Long userId, List<Item> items) {
-        this.id = idGenerator++;
-        this.userId = userId;
+    public Order(User user, List<Item> items) {
+        this.user = user;
         this.items = items;
     }
 
-    public Order(Long id, Long userId, List<Item> items) {
+    public Order(Long id, User user, List<Item> items) {
         this.id = id;
-        this.userId = userId;
+        this.user = user;
         this.items = items;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Double totalPrice() {
         return items.stream().mapToDouble(Item::getPrice).sum();
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public void setItems(List<Item> items) {
@@ -37,8 +39,8 @@ public class Order {
         return id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
     public List<Item> getItems() {

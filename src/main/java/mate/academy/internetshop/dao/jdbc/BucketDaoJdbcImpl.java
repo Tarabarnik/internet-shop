@@ -1,11 +1,5 @@
 package mate.academy.internetshop.dao.jdbc;
 
-import mate.academy.internetshop.dao.BucketDao;
-import mate.academy.internetshop.dao.ItemDao;
-import mate.academy.internetshop.lib.Dao;
-import mate.academy.internetshop.lib.Inject;
-import mate.academy.internetshop.model.Bucket;
-import mate.academy.internetshop.model.Item;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import mate.academy.internetshop.dao.BucketDao;
+import mate.academy.internetshop.dao.ItemDao;
+import mate.academy.internetshop.dao.UserDao;
+import mate.academy.internetshop.lib.Dao;
+import mate.academy.internetshop.lib.Inject;
+import mate.academy.internetshop.model.Bucket;
+import mate.academy.internetshop.model.Item;
+
 import org.apache.log4j.Logger;
 
 @Dao
@@ -21,6 +23,8 @@ public class BucketDaoJdbcImpl extends AbstractDao<Bucket> implements BucketDao 
     private static Logger logger = Logger.getLogger(BucketDaoJdbcImpl.class);
     @Inject
     private static ItemDao itemDao;
+    @Inject
+    private static UserDao userDao;
 
     public BucketDaoJdbcImpl(Connection connection) {
         super(connection);
@@ -31,7 +35,7 @@ public class BucketDaoJdbcImpl extends AbstractDao<Bucket> implements BucketDao 
         String query = "INSERT INTO buckets (user_id) VALUES (?);";
         try (PreparedStatement statement = connection.prepareStatement(query,
                 PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setLong(1, bucket.getUserId());
+            statement.setLong(1, bucket.getUser().getId());
             statement.executeUpdate();
             ResultSet resultSet = statement.getGeneratedKeys();
             long dbBucketId = 0L;
@@ -41,7 +45,7 @@ public class BucketDaoJdbcImpl extends AbstractDao<Bucket> implements BucketDao 
             for (Item item : bucket.getItems()) {
                 addItemToBucket(dbBucketId, item.getId());
             }
-            bucket = new Bucket(dbBucketId, bucket.getItems(), bucket.getUserId());
+            bucket = new Bucket(dbBucketId, bucket.getItems(), bucket.getUser());
         } catch (SQLException e) {
             logger.error("Can't add new bucket with id=" + bucket.getId(), e);
         }
@@ -59,7 +63,7 @@ public class BucketDaoJdbcImpl extends AbstractDao<Bucket> implements BucketDao 
                 userId = resultSet.getLong("user_id");
             }
             List<Item> items = getItemsFromBucket(bucketId);
-            return Optional.of(new Bucket(bucketId, items, userId));
+            return Optional.of(new Bucket(bucketId, items, userDao.get(userId).get()));
         } catch (SQLException e) {
             logger.error("Can't get user id by bucket id=" + bucketId, e);
             return Optional.empty();
@@ -70,7 +74,7 @@ public class BucketDaoJdbcImpl extends AbstractDao<Bucket> implements BucketDao 
     public Bucket update(Bucket bucket) {
         String query = "UPDATE buckets SET user_id = ? WHERE bucket_id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setLong(1, bucket.getUserId());
+            preparedStatement.setLong(1, bucket.getUser().getId());
             preparedStatement.setLong(2, bucket.getId());
             preparedStatement.executeUpdate();
             for (Item item : bucket.getItems()) {
