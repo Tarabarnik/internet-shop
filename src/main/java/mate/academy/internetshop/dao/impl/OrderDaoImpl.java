@@ -27,7 +27,7 @@ public class OrderDaoImpl implements OrderDao {
     public Order update(Order newOrder) {
         Order order = get(newOrder.getId()).get();
         order.setItems(newOrder.getItems());
-        order.setUserId(newOrder.getUserId());
+        order.setUser(newOrder.getUser());
         return order;
     }
 

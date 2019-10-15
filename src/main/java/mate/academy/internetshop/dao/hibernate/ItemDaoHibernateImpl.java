@@ -1,5 +1,9 @@
 package mate.academy.internetshop.dao.hibernate;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import mate.academy.internetshop.dao.ItemDao;
 import mate.academy.internetshop.lib.Dao;
 import mate.academy.internetshop.model.Item;
@@ -7,10 +11,6 @@ import mate.academy.internetshop.util.HibernateUtil;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 @Dao
 public class ItemDaoHibernateImpl implements ItemDao {
@@ -52,7 +52,7 @@ public class ItemDaoHibernateImpl implements ItemDao {
             session.update(item);
             transaction.commit();
         } catch (Exception e) {
-            logger.error("Can't update item by id="+item.getId(), e);
+            logger.error("Can't update item by id=" + item.getId(), e);
             if (transaction != null) {
                 transaction.rollback();
             }

@@ -1,11 +1,5 @@
 package mate.academy.internetshop.dao.jdbc;
 
-import mate.academy.internetshop.dao.ItemDao;
-import mate.academy.internetshop.dao.OrderDao;
-import mate.academy.internetshop.lib.Dao;
-import mate.academy.internetshop.lib.Inject;
-import mate.academy.internetshop.model.Item;
-import mate.academy.internetshop.model.Order;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +9,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import mate.academy.internetshop.dao.ItemDao;
+import mate.academy.internetshop.dao.OrderDao;
+import mate.academy.internetshop.dao.UserDao;
+import mate.academy.internetshop.lib.Dao;
+import mate.academy.internetshop.lib.Inject;
+import mate.academy.internetshop.model.Item;
+import mate.academy.internetshop.model.Order;
+
+import mate.academy.internetshop.model.User;
 import org.apache.log4j.Logger;
 
 @Dao
@@ -22,6 +25,8 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
     private static Logger logger = Logger.getLogger(OrderDaoJdbcImpl.class);
     @Inject
     private static ItemDao itemDao;
+    @Inject
+    private static UserDao userDao;
 
     public OrderDaoJdbcImpl(Connection connection) {
         super(connection);
@@ -33,7 +38,7 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
         Long orderId = null;
         try (PreparedStatement statement = connection.prepareStatement(query,
                 PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setLong(1, order.getUserId());
+            statement.setLong(1, order.getUser().getId());
             statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
             generatedKeys.next();
@@ -44,7 +49,7 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
         for (Item item : order.getItems()) {
             addItemToOrder(orderId, item.getId());
         }
-        return new Order(orderId, order.getUserId(), order.getItems());
+        return new Order(orderId, order.getUser(), order.getItems());
     }
 
     @Override
@@ -58,7 +63,8 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
                 userId = resultSet.getLong("user_id");
             }
             List<Item> items = getItemsFromOrder(id);
-            return Optional.of(new Order(id, userId, items));
+            User user = userDao.get(userId).get();
+            return Optional.of(new Order(id, user, items));
         } catch (SQLException e) {
             logger.error("Can't get order by id=" + id, e);
         }
@@ -69,7 +75,7 @@ public class OrderDaoJdbcImpl extends AbstractDao<Order> implements OrderDao {
     public Order update(Order newOrder) {
         String query = "UPDATE orders SET user_id = ? WHERE order_id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setLong(1, newOrder.getUserId());
+            preparedStatement.setLong(1, newOrder.getUser().getId());
             preparedStatement.setLong(2, newOrder.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

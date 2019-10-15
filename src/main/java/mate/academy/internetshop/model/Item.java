@@ -32,6 +32,10 @@ public class Item {
         this.price = price;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

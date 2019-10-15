@@ -9,13 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import mate.academy.internetshop.lib.Inject;
 import mate.academy.internetshop.model.Order;
 import mate.academy.internetshop.service.OrderService;
-import mate.academy.internetshop.service.UserService;
 
 public class DeleteOrderController extends HttpServlet {
     @Inject
     private static OrderService orderService;
-    @Inject
-    private static UserService userService;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -23,7 +20,7 @@ public class DeleteOrderController extends HttpServlet {
         String orderId = req.getParameter("order_id");
         Order order = orderService.get(Long.valueOf(orderId)).get();
         orderService.remove(order.getId());
-        userService.get(order.getUserId()).get().getOrders().remove(order);
+        order.getUser().getOrders().remove(order);
         resp.sendRedirect(req.getContextPath() + "/index");
     }
 }
